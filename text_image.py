@@ -15,8 +15,17 @@ prompt = st.text_input("Enter a text prompt for image generation:", "a cricket s
 
 if st.button("Generate Image"):
     with st.spinner("Generating image..."):
-        # Generate the image
-        image = pipe(prompt).images[0]
-    
-        # Display the image
-        st.image(image, caption="Generated Image", use_column_width=True)
+        try:
+            # Generate the image
+            result = pipe(prompt)
+            image = result.images[0]
+            
+            # Ensure image is in PIL format
+            if not isinstance(image, Image.Image):
+                image = Image.fromarray(image)
+
+            # Display the image
+            st.image(image, caption="Generated Image", use_column_width=True)
+        
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
