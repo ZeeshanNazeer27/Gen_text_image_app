@@ -4,7 +4,7 @@ from diffusers import DiffusionPipeline
 from PIL import Image
 
 # Load the stable diffusion pipeline
-pipeline = DiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5")
+pipeline = DiffusionPipeline.from_pretrained("diffusers/stable-diffusion-xl-1.0-inpainting-0.1")
 pipe = pipeline.to("cuda" if torch.cuda.is_available() else "cpu")  
 
 # Streamlit app
