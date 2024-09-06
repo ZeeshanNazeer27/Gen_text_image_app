@@ -1,65 +1,41 @@
 import streamlit as st
 import torch
 from diffusers import DiffusionPipeline
+import matplotlib.pyplot as plt
 from PIL import Image
-import numpy as np
 
-# Load the stable diffusion pipeline
-pipeline = DiffusionPipeline.from_pretrained("diffusers/stable-diffusion-xl-1.0-inpainting-0.1")
-pipe = pipeline.to("cuda" if torch.cuda.is_available() else "cpu")
+# Function to load the model
+@st.cache_resource
+def load_model():
+    # Load the stable diffusion pipeline
+    pipeline = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-2")
+    pipe = pipeline.to("cuda")
+    return pipe
 
-# Streamlit app
+# Streamlit app layout
 st.title("Text-to-Image Generator")
 
-# Text prompt input
-prompt = st.text_input("Enter a text prompt for image generation:", "a cricket stadium with match going on in it")
+# User input for the text prompt
+prompt = st.text_input("Enter your prompt for the image generation:", "a cricket stadium with match going on in it")
 
+# Button to generate the image
 if st.button("Generate Image"):
-    with st.spinner("Generating image..."):
-        try:
-            # Generate the image
-            result = pipe(prompt)
-            
-            # Debugging information
-            st.write(f"Type of result: {type(result)}")
-            st.write(f"Type of result.images: {type(result.images)}")
-            st.write(f"Type of result.images[0]: {type(result.images[0])}")
+    # Load the model
+    pipe = load_model()
 
-            # Display raw result for inspection
-            if isinstance(result.images, list):
-                st.write(f"Length of result.images: {len(result.images)}")
-                st.write("First few elements of result.images:", result.images[:1])
-            else:
-                st.write("result.images is not a list")
+    # Display a message while generating the image
+    with st.spinner('Generating image...'):
+        image = pipe(prompt).images[0]
 
-            # Extract the image
-            image = result.images[0]
-            
-            # Convert image to a format Streamlit can display
-            if isinstance(image, torch.Tensor):
-                st.write("Result is a torch.Tensor")
-                image = image.cpu().numpy()
-                if image.ndim == 4:  # Handle batch dimension if present
-                    image = image[0]
-                if image.ndim == 3:
-                    image = np.transpose(image, (1, 2, 0))  # Convert from CHW to HWC format
-                image = Image.fromarray(image.astype(np.uint8))
-            elif isinstance(image, np.ndarray):
-                st.write("Result is a numpy.ndarray")
-                if image.ndim == 4:  # Handle batch dimension if present
-                    image = image[0]
-                if image.ndim == 3:
-                    image = np.transpose(image, (1, 2, 0))  # Convert from CHW to HWC format
-                image = Image.fromarray(image.astype(np.uint8))
-            elif isinstance(image, Image.Image):
-                st.write("Result is a PIL.Image")
-                # No conversion needed
-                pass
-            else:
-                raise TypeError("Output is in an unsupported format")
+    # Save and display the generated image
+    image.save("generated_image.png")
+    st.image(image, caption="Generated Image", use_column_width=True)
 
-            # Display the image
-            st.image(image, caption="Generated Image", use_column_width=True)
-
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+    # Provide download option
+    with open("generated_image.png", "rb") as file:
+        btn = st.download_button(
+            label="Download Image",
+            data=file,
+            file_name="generated_image.png",
+            mime="image/png"
+        )
