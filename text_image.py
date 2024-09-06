@@ -9,7 +9,7 @@ from PIL import Image
 def load_model():
     # Load the stable diffusion pipeline
     pipeline = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-2")
-    pipe = pipeline.to("cuda")
+    pipe = pipeline.to("cpu")
     return pipe
 
 # Streamlit app layout
