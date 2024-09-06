@@ -19,20 +19,47 @@ if st.button("Generate Image"):
         try:
             # Generate the image
             result = pipe(prompt)
+            
+            # Debugging information
+            st.write(f"Type of result: {type(result)}")
+            st.write(f"Type of result.images: {type(result.images)}")
+            st.write(f"Type of result.images[0]: {type(result.images[0])}")
+
+            # Display raw result for inspection
+            if isinstance(result.images, list):
+                st.write(f"Length of result.images: {len(result.images)}")
+                st.write("First few elements of result.images:", result.images[:1])
+            else:
+                st.write("result.images is not a list")
+
+            # Extract the image
             image = result.images[0]
             
-            # Ensure image is in PIL format
+            # Convert image to a format Streamlit can display
             if isinstance(image, torch.Tensor):
-                # Convert torch.Tensor to PIL.Image
-                image = Image.fromarray(image.cpu().numpy().astype(np.uint8))
-            elif isinstance(image, np.ndarray):
-                # Convert numpy.ndarray to PIL.Image
+                st.write("Result is a torch.Tensor")
+                image = image.cpu().numpy()
+                if image.ndim == 4:  # Handle batch dimension if present
+                    image = image[0]
+                if image.ndim == 3:
+                    image = np.transpose(image, (1, 2, 0))  # Convert from CHW to HWC format
                 image = Image.fromarray(image.astype(np.uint8))
-            elif not isinstance(image, Image.Image):
+            elif isinstance(image, np.ndarray):
+                st.write("Result is a numpy.ndarray")
+                if image.ndim == 4:  # Handle batch dimension if present
+                    image = image[0]
+                if image.ndim == 3:
+                    image = np.transpose(image, (1, 2, 0))  # Convert from CHW to HWC format
+                image = Image.fromarray(image.astype(np.uint8))
+            elif isinstance(image, Image.Image):
+                st.write("Result is a PIL.Image")
+                # No conversion needed
+                pass
+            else:
                 raise TypeError("Output is in an unsupported format")
-            
+
             # Display the image
             st.image(image, caption="Generated Image", use_column_width=True)
-        
+
         except Exception as e:
             st.error(f"An error occurred: {e}")
