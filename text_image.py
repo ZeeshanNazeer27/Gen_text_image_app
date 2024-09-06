@@ -8,7 +8,7 @@ from PIL import Image
 @st.cache_resource
 def load_model():
     # Load the stable diffusion pipeline
-    pipeline = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-2")
+    pipeline = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-2-base")
     pipe = pipeline.to("cpu")
     return pipe
 
