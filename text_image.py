@@ -16,7 +16,7 @@ def load_model():
 st.title("Text-to-Image Generator")
 
 # User input for the text prompt
-prompt = st.text_input("Enter your prompt for the image generation:", "a cricket stadium with match going on in it")
+prompt = st.text_input("Enter your prompt for the image generation:")
 
 # Button to generate the image
 if st.button("Generate Image"):
