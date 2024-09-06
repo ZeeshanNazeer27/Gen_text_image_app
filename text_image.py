@@ -21,7 +21,7 @@ prompt = st.text_input("Enter your prompt for the image generation:")
 # Button to generate the image
 if st.button("Generate Image"):
     # Load the model
-    pipe = load_model()
+    #pipe = load_model()
 
     # Display a message while generating the image
     with st.spinner('Generating image...'):
